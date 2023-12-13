@@ -1,3 +1,3 @@
 # average-shade
 
-_Check the [related documentation](https://swiss-ai-center.github.io/swiss-ai-center/reference/average-shade) for more information._
+_Check the [related documentation](https://docs.swiss-ai-center.ch/reference/services/average-shade) for more information._
