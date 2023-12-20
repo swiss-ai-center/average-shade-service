@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: average-shade-service
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - name: http
       port: 8383
