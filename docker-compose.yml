@@ -21,6 +21,6 @@ services:
       - SERVICE_URL=http://host.docker.internal:9090
     ports:
       - 9090:9090
-    working_dir: /workspaces/core-engine-backend
+    working_dir: /workspaces/service
     volumes:
-      - .:/workspaces/core-engine-backend
+      - .:/workspaces/service
