@@ -55,6 +55,7 @@ class MyService(Service):
                     acronym=ExecutionUnitTagAcronym.IMAGE_PROCESSING
                 ),
             ],
+            docs_url="https://docs.swiss-ai-center.ch/reference/services/average-shade/",
             has_ai=False
         )
         self._logger = get_logger(settings)
