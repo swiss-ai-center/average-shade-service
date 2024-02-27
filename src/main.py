@@ -14,9 +14,16 @@ from common_code.tasks.service import TasksService
 from common_code.tasks.models import TaskData
 from common_code.service.models import Service
 from common_code.service.enums import ServiceStatus
-from common_code.common.enums import FieldDescriptionType, ExecutionUnitTagName, ExecutionUnitTagAcronym
+from common_code.common.enums import (
+    FieldDescriptionType,
+    ExecutionUnitTagName,
+    ExecutionUnitTagAcronym,
+)
 from common_code.common.models import FieldDescription, ExecutionUnitTag
 from contextlib import asynccontextmanager
+from test_processing import main_test
+from test_processing import TestResult, TestResultList
+from common_code.config import get_settings
 
 # Imports required by the service's model
 import json
@@ -44,19 +51,27 @@ class MyService(Service):
             description=api_description,
             status=ServiceStatus.AVAILABLE,
             data_in_fields=[
-                FieldDescription(name="image", type=[FieldDescriptionType.IMAGE_PNG, FieldDescriptionType.IMAGE_JPEG]),
+                FieldDescription(
+                    name="image",
+                    type=[
+                        FieldDescriptionType.IMAGE_PNG,
+                        FieldDescriptionType.IMAGE_JPEG,
+                    ],
+                ),
             ],
             data_out_fields=[
-                FieldDescription(name="result", type=[FieldDescriptionType.APPLICATION_JSON]),
+                FieldDescription(
+                    name="result", type=[FieldDescriptionType.APPLICATION_JSON]
+                ),
             ],
             tags=[
                 ExecutionUnitTag(
                     name=ExecutionUnitTagName.IMAGE_PROCESSING,
-                    acronym=ExecutionUnitTagAcronym.IMAGE_PROCESSING
+                    acronym=ExecutionUnitTagAcronym.IMAGE_PROCESSING,
                 ),
             ],
             docs_url="https://docs.swiss-ai-center.ch/reference/services/average-shade/",
-            has_ai=False
+            has_ai=False,
         )
         self._logger = get_logger(settings)
 
@@ -68,12 +83,14 @@ class MyService(Service):
         average_color = np.average(average_color_row, axis=0)
         return {
             "result": TaskData(
-                data=json.dumps({
-                    "Red": int(average_color[2]),
-                    "Green": int(average_color[1]),
-                    "Blue": int(average_color[0])
-                }),
-                type=FieldDescriptionType.APPLICATION_JSON
+                data=json.dumps(
+                    {
+                        "Red": int(average_color[2]),
+                        "Green": int(average_color[1]),
+                        "Blue": int(average_color[0]),
+                    }
+                ),
+                type=FieldDescriptionType.APPLICATION_JSON,
             )
         }
 
@@ -108,13 +125,17 @@ async def lifespan(app: FastAPI):
         for engine_url in settings.engine_urls:
             announced = False
             while not announced and retries > 0:
-                announced = await service_service.announce_service(my_service, engine_url)
+                announced = await service_service.announce_service(
+                    my_service, engine_url
+                )
                 retries -= 1
                 if not announced:
                     time.sleep(settings.engine_announce_retry_delay)
                     if retries == 0:
-                        logger.warning(f"Aborting service announcement after "
-                                       f"{settings.engine_announce_retries} retries")
+                        logger.warning(
+                            f"Aborting service announcement after "
+                            f"{settings.engine_announce_retries} retries"
+                        )
 
     # Announce the service to its engine
     asyncio.ensure_future(announce())
@@ -155,8 +176,8 @@ app = FastAPI(
 )
 
 # Include routers from other files
-app.include_router(service_router, tags=['Service'])
-app.include_router(tasks_router, tags=['Tasks'])
+app.include_router(service_router, tags=["Service"])
+app.include_router(tasks_router, tags=["Tasks"])
 
 app.add_middleware(
     CORSMiddleware,
@@ -171,3 +192,14 @@ app.add_middleware(
 @app.get("/", include_in_schema=False)
 async def root():
     return RedirectResponse("/docs", status_code=301)
+
+
+@app.get("/test", include_in_schema=False)
+async def root():
+    test_result_list = main_test()
+    for test_result in test_result_list:
+        if test_result.result == False:
+            return RedirectResponse(
+                "/test", status_code=500, headers={"Tests Result": "Failed"}
+            )
+    return RedirectResponse("/test", status_code=200)

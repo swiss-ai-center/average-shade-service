@@ -1,3 +1,4 @@
 common-code[test] @ git+https://github.com/swiss-ai-center/common-code.git@main
 numpy==1.24.2
 opencv-python==4.5.5.64
+requests==2.31.0
