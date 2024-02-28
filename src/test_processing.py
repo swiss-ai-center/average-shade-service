@@ -2,8 +2,9 @@ from typing import List
 from typing_extensions import TypedDict
 import os
 import json
-import requests
-
+from common_code.service.models import Service
+from common_code.tasks.models import TaskData
+import json
 
 class TestResult(TypedDict):
     name: str
@@ -12,16 +13,15 @@ class TestResult(TypedDict):
 
 class TestResultList(TypedDict):
     results: List[TestResult]
+    tests_passed:bool
 
 
-def main_test():
-    result1 = test_image_1()
-    result2 = test_image_2()
+def main_test(service: Service):
+    results=[test_image_1(service), test_image_2(service)]
+    tests_passed = all([result["result"] for result in results])
+    return TestResultList(results=results, tests_passed=tests_passed)
 
-    return TestResultList(results=[result1, result2])
-
-
-def test_image_1():
+def test_image_1(service: Service):
     image_path = os.path.join("..", "data", "pexels-fanny-hagan.jpg")
     expected_results_path = os.path.join(
         "..", "data", "results-pexels-fanny-hagan.json"
@@ -33,17 +33,17 @@ def test_image_1():
     with open(image_path, "rb") as f:
         image_data = f.read()
 
-    # Send the image as an HTTP object
-    response = requests.post(url="0.0.0.0:80/process", data=image_data)
-    actual_results = response.json()
-    print(actual_results)
+    data = {"image": TaskData(data=image_data, type="image/jpeg")}
+    response = service.process(data)
+    print(response)
+    actual_results = json.loads(response["result"].data.decode('utf-8'))
 
     return TestResult(
-        name="test_image_1", result=actual_results.data == expected_results
+        name="test_image_1", result=actual_results == expected_results
     )
 
 
-def test_image_2():
+def test_image_2(service: Service):
     image_path = os.path.join("..", "data", "pexels-gosia-k.jpg")
     expected_results_path = os.path.join("..", "data", "results-pexels-gosia-k.json")
 
@@ -53,11 +53,10 @@ def test_image_2():
     with open(image_path, "rb") as f:
         image_data = f.read()
 
-    # FIXME: requests.exceptions.InvalidSchema: No connection adapters were found for 'localhost:80/process'
-    response = requests.post(url="localhost:80/process", data=image_data)
-    actual_results = response.json()
-    print(actual_results)
+    data = {"image": TaskData(data=image_data, type="image/jpeg")}
+    response = service.process(data)
+    actual_results = json.loads(response["result"].data.decode('utf-8'))
 
     return TestResult(
-        name="test_image_2", result=actual_results.data == expected_results
+        name="test_image_2", result=actual_results == expected_results
     )

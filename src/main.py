@@ -1,6 +1,6 @@
 import asyncio
 import time
-from fastapi import FastAPI
+from fastapi import FastAPI,HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from common_code.config import get_settings
@@ -194,12 +194,11 @@ async def root():
     return RedirectResponse("/docs", status_code=301)
 
 
-@app.get("/test", include_in_schema=False)
-async def root():
-    test_result_list = main_test()
-    for test_result in test_result_list:
-        if test_result.result == False:
-            return RedirectResponse(
-                "/test", status_code=500, headers={"Tests Result": "Failed"}
-            )
-    return RedirectResponse("/test", status_code=200)
+@app.get("/test", summary="Tests the service",responses={200: {"detail": "Tests failed"},204: {"detail": "Tests passed"},500:{"detail": "Internal Server error"}},status_code=204)
+async def test():
+    logger = get_logger(settings)
+    logger.info("Running tests")
+    my_service = MyService()
+    test_result_list = main_test(my_service)
+    if test_result_list["tests_passed"] == False:
+        raise HTTPException(status_code=200, detail=test_result_list["results"])

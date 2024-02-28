@@ -17,6 +17,7 @@ RUN pip install --requirement requirements.txt --requirement requirements-all.tx
 # Copy sources
 COPY src src
 COPY tests tests
+COPY data data
 
 # Environment variables
 ENV ENVIRONMENT=${ENVIRONMENT}
