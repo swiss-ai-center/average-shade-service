@@ -22,9 +22,9 @@ def main_test(service: Service):
     return TestResultList(results=results, tests_passed=tests_passed)
 
 def test_image_1(service: Service):
-    image_path = os.path.join("..", "data", "pexels-fanny-hagan.jpg")
+    image_path = os.path.join("test_data", "pexels-fanny-hagan.jpg")
     expected_results_path = os.path.join(
-        "..", "data", "results-pexels-fanny-hagan.json"
+        "test_data", "results-pexels-fanny-hagan.json"
     )
 
     with open(expected_results_path, "r") as f:
@@ -44,8 +44,8 @@ def test_image_1(service: Service):
 
 
 def test_image_2(service: Service):
-    image_path = os.path.join("..", "data", "pexels-gosia-k.jpg")
-    expected_results_path = os.path.join("..", "data", "results-pexels-gosia-k.json")
+    image_path = os.path.join("test_data", "pexels-gosia-k.jpg")
+    expected_results_path = os.path.join("test_data", "results-pexels-gosia-k.json")
 
     with open(expected_results_path, "r") as f:
         expected_results = json.load(f)
