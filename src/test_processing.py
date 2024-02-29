@@ -16,7 +16,7 @@ class TestResultList(TypedDict):
     tests_passed:bool
 
 
-def main_test(service: Service):
+async def main_test(service: Service):
     results=[test_image_1(service), test_image_2(service)]
     tests_passed = all([result["result"] for result in results])
     return TestResultList(results=results, tests_passed=tests_passed)
