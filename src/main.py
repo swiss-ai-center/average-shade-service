@@ -198,9 +198,10 @@ async def root():
 
 @app.get("/test", summary="Tests the service",responses={200: {"detail": "Tests failed"},204: {"detail": "Tests passed"},500:{"detail": "Internal Server error"}},status_code=204)
 async def test():
-    #TODO check common_code process task for async exemple
     my_service = MyService()
-    test_result_list = main_test(my_service)
+    loop=asyncio.get_event_loop()
+    test_result_future=loop.run_in_executor(None,main_test,my_service)
+    test_result_list = await test_result_future
     if test_result_list["tests_passed"] == False:
         raise HTTPException(status_code=200, detail=test_result_list["results"])
 
