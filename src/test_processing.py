@@ -35,7 +35,6 @@ def test_image_1(service: Service):
 
     data = {"image": TaskData(data=image_data, type="image/jpeg")}
     response = service.process(data)
-    print(response)
     actual_results = json.loads(response["result"].data.decode('utf-8'))
 
     return TestResult(

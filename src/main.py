@@ -1,8 +1,10 @@
 import asyncio
 import time
+import os
+import zipfile
 from fastapi import FastAPI,HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from common_code.config import get_settings
 from common_code.http_client import HttpClient
 from common_code.logger.logger import get_logger, Logger
@@ -196,9 +198,29 @@ async def root():
 
 @app.get("/test", summary="Tests the service",responses={200: {"detail": "Tests failed"},204: {"detail": "Tests passed"},500:{"detail": "Internal Server error"}},status_code=204)
 async def test():
-    logger = get_logger(settings)
-    logger.info("Running tests")
+    #TODO check common_code process task for async exemple
     my_service = MyService()
     test_result_list = main_test(my_service)
     if test_result_list["tests_passed"] == False:
         raise HTTPException(status_code=200, detail=test_result_list["results"])
+
+
+@app.get("/download_test_data/", summary="Download test data",responses={200: {"detail": "Test data downloaded"},500:{"detail": "Internal Server error"},404:{"detail":"Data not found"}},status_code=200)
+async def download_test_data():
+    folder_path = os.path.join(".", "test_data")
+    zip_file_path = os.path.join(".", "test_data","test_data.zip")
+
+    if not os.path.exists(folder_path):
+        raise HTTPException(status_code=404, detail="Data not found")
+
+    if not os.path.exists(zip_file_path):
+        with zipfile.ZipFile(zip_file_path, "w") as zip_file:
+            for file_name in os.listdir(folder_path):
+                file_path = os.path.join(folder_path, file_name)
+                if os.path.isfile(file_path) and file_name.lower().endswith(".jpg"):
+                    zip_file.write(file_path, file_name)
+
+    return FileResponse(zip_file_path, media_type="application/octet-stream", filename="test_data.zip")
+
+
+
