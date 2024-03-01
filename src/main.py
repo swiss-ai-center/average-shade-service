@@ -16,16 +16,15 @@ from common_code.tasks.service import TasksService
 from common_code.tasks.models import TaskData
 from common_code.service.models import Service
 from common_code.service.enums import ServiceStatus
+from common_code.config import get_settings
+from common_code.common.models import FieldDescription, ExecutionUnitTag
 from common_code.common.enums import (
     FieldDescriptionType,
     ExecutionUnitTagName,
     ExecutionUnitTagAcronym,
 )
-from common_code.common.models import FieldDescription, ExecutionUnitTag
 from contextlib import asynccontextmanager
 from test_processing import main_test
-from test_processing import TestResult, TestResultList
-from common_code.config import get_settings
 
 # Imports required by the service's model
 import json
@@ -196,7 +195,13 @@ async def root():
     return RedirectResponse("/docs", status_code=301)
 
 
-@app.get("/test", summary="Tests the service",responses={200: {"detail": "Tests failed"},204: {"detail": "Tests passed"},500:{"detail": "Internal Server error"}},status_code=204)
+@app.get("/test",
+          summary="Tests the service",
+          responses={
+              200: {"detail": "Tests failed"},
+              204: {"detail": "Tests passed"},
+              500:{"detail": "Internal Server error"}
+              },status_code=204)
 async def test():
     my_service = MyService()
     loop=asyncio.get_event_loop()
@@ -206,7 +211,14 @@ async def test():
         raise HTTPException(status_code=200, detail=test_result_list["results"])
 
 
-@app.get("/download_test_data/", summary="Download test data",responses={200: {"detail": "Test data downloaded"},500:{"detail": "Internal Server error"},404:{"detail":"Data not found"}},status_code=200)
+@app.get("/download_test_data/",
+         summary="Download test data",
+         responses={
+             200: {"detail": "Test data downloaded"},
+             500:{"detail": "Internal Server error"},
+             404:{"detail":"Data not found"}
+             },
+             status_code=200)
 async def download_test_data():
     folder_path = os.path.join(".", "test_data")
     zip_file_path = os.path.join(".", "test_data","test_data.zip")
