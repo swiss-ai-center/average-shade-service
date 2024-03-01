@@ -2,7 +2,7 @@ import asyncio
 import time
 import os
 import zipfile
-from fastapi import FastAPI,HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse, FileResponse
 from common_code.config import get_settings
@@ -16,7 +16,6 @@ from common_code.tasks.service import TasksService
 from common_code.tasks.models import TaskData
 from common_code.service.models import Service
 from common_code.service.enums import ServiceStatus
-from common_code.config import get_settings
 from common_code.common.models import FieldDescription, ExecutionUnitTag
 from common_code.common.enums import (
     FieldDescriptionType,
@@ -195,33 +194,38 @@ async def root():
     return RedirectResponse("/docs", status_code=301)
 
 
-@app.get("/test",
-          summary="Tests the service",
-          responses={
-              200: {"detail": "Tests failed"},
-              204: {"detail": "Tests passed"},
-              500:{"detail": "Internal Server error"}
-              },status_code=204)
+@app.get(
+    "/test",
+    summary="Tests the service",
+    responses={
+        200: {"detail": "Tests failed"},
+        204: {"detail": "Tests passed"},
+        500: {"detail": "Internal Server error"},
+    },
+    status_code=204,
+)
 async def test():
     my_service = MyService()
-    loop=asyncio.get_event_loop()
-    test_result_future=loop.run_in_executor(None,main_test,my_service)
+    loop = asyncio.get_event_loop()
+    test_result_future = loop.run_in_executor(None, main_test, my_service)
     test_result_list = await test_result_future
-    if test_result_list["tests_passed"] == False:
+    if not test_result_list["tests_passed"]:
         raise HTTPException(status_code=200, detail=test_result_list["results"])
 
 
-@app.get("/download_test_data/",
-         summary="Download test data",
-         responses={
-             200: {"detail": "Test data downloaded"},
-             500:{"detail": "Internal Server error"},
-             404:{"detail":"Data not found"}
-             },
-             status_code=200)
+@app.get(
+    "/download_test_data/",
+    summary="Download test data",
+    responses={
+        200: {"detail": "Test data downloaded"},
+        500: {"detail": "Internal Server error"},
+        404: {"detail": "Data not found"},
+    },
+    status_code=200,
+)
 async def download_test_data():
     folder_path = os.path.join(".", "test_data")
-    zip_file_path = os.path.join(".", "test_data","test_data.zip")
+    zip_file_path = os.path.join(".", "test_data", "test_data.zip")
 
     if not os.path.exists(folder_path):
         raise HTTPException(status_code=404, detail="Data not found")
@@ -233,7 +237,6 @@ async def download_test_data():
                 if os.path.isfile(file_path) and file_name.lower().endswith(".jpg"):
                     zip_file.write(file_path, file_name)
 
-    return FileResponse(zip_file_path, media_type="application/octet-stream", filename="test_data.zip")
-
-
-
+    return FileResponse(
+        zip_file_path, media_type="application/octet-stream", filename="test_data.zip"
+    )
