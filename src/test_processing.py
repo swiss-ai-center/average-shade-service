@@ -4,6 +4,7 @@ from common_code.service.models import Service
 from common_code.tasks.models import TaskData
 from common_code.common.models import TestResult, TestResultList
 
+
 def main_test(service: Service):
     results = [test_image_1(service), test_image_2(service)]
     tests_passed = all([result["result"] for result in results])
