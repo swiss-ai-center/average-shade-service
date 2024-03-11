@@ -1,29 +1,15 @@
 import os
 import json
-import pytest
-from typing import List
-from typing_extensions import TypedDict
 from common_code.service.models import Service
 from common_code.tasks.models import TaskData
+from common_code.common.models import TestResult, TestResultList
 
-
-class TestResult(TypedDict):
-    name: str
-    result: bool
-
-
-class TestResultList(TypedDict):
-    results: List[TestResult]
-    tests_passed: bool
-
-
-async def main_test(service: Service):
+def main_test(service: Service):
     results = [test_image_1(service), test_image_2(service)]
     tests_passed = all([result["result"] for result in results])
     return TestResultList(results=results, tests_passed=tests_passed)
 
 
-@pytest.fixture(name="service")
 def test_image_1(service: Service):
     image_path = os.path.join("test_data", "pexels-fanny-hagan.jpg")
     expected_results_path = os.path.join("test_data", "results-pexels-fanny-hagan.json")
@@ -41,7 +27,6 @@ def test_image_1(service: Service):
     return TestResult(name="test_image_1", result=actual_results == expected_results)
 
 
-@pytest.fixture(name="service")
 def test_image_2(service: Service):
     image_path = os.path.join("test_data", "pexels-gosia-k.jpg")
     expected_results_path = os.path.join("test_data", "results-pexels-gosia-k.json")
