@@ -24,10 +24,10 @@ from common_code.common.enums import (
 )
 from contextlib import asynccontextmanager
 
-#TODO: check this with other devs
+# TODO: check this with other devs
 import sys
 
-sys.path.append('../tests/')
+sys.path.append("../tests/")
 
 import test_processing
 
@@ -101,11 +101,12 @@ class MyService(Service):
         }
 
     def main_test(self):
-        results = [test_processing.test_image_1(self), test_processing.test_image_2(self)]
+        results = [
+            test_processing.test_image_1(self),
+            test_processing.test_image_2(self),
+        ]
         tests_passed = all([result["result"] for result in results])
         return TestResultList(results=results, tests_passed=tests_passed)
-
-
 
 
 service_service: ServiceService | None = None
@@ -207,7 +208,8 @@ async def root():
     return RedirectResponse("/docs", status_code=301)
 
 
-#TODO: check what group this endpoint should be in
+# TODO: check what group this endpoint should be in
+
 
 @app.get(
     "/test",
