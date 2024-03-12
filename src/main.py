@@ -16,14 +16,20 @@ from common_code.tasks.service import TasksService
 from common_code.tasks.models import TaskData
 from common_code.service.models import Service
 from common_code.service.enums import ServiceStatus
-from common_code.common.models import FieldDescription, ExecutionUnitTag
+from common_code.common.models import FieldDescription, ExecutionUnitTag, TestResult, TestResultList
 from common_code.common.enums import (
     FieldDescriptionType,
     ExecutionUnitTagName,
     ExecutionUnitTagAcronym,
 )
 from contextlib import asynccontextmanager
-from test_processing import main_test
+
+#TODO: check this with other devs
+import sys
+
+sys.path.append('../tests/')
+
+import test_processing
 
 # Imports required by the service's model
 import json
@@ -93,6 +99,13 @@ class MyService(Service):
                 type=FieldDescriptionType.APPLICATION_JSON,
             )
         }
+
+    def main_test(self):
+        results = [test_processing.test_image_1(self), test_processing.test_image_2(self)]
+        tests_passed = all([result["result"] for result in results])
+        return TestResultList(results=results, tests_passed=tests_passed)
+
+
 
 
 service_service: ServiceService | None = None
@@ -194,6 +207,8 @@ async def root():
     return RedirectResponse("/docs", status_code=301)
 
 
+#TODO: check what group this endpoint should be in
+
 @app.get(
     "/test",
     summary="Tests the service",
@@ -207,7 +222,7 @@ async def root():
 async def test():
     my_service = MyService()
     loop = asyncio.get_event_loop()
-    test_result_future = loop.run_in_executor(None, main_test, my_service)
+    test_result_future = loop.run_in_executor(None, my_service.main_test)
     test_result_list = await test_result_future
     if not test_result_list["tests_passed"]:
         raise HTTPException(status_code=200, detail=test_result_list["results"])
