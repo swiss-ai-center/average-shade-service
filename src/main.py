@@ -16,7 +16,7 @@ from common_code.tasks.service import TasksService
 from common_code.tasks.models import TaskData
 from common_code.service.models import Service
 from common_code.service.enums import ServiceStatus
-from common_code.common.models import FieldDescription, ExecutionUnitTag, TestResult, TestResultList
+from common_code.common.models import FieldDescription, ExecutionUnitTag, TestResultList
 from common_code.common.enums import (
     FieldDescriptionType,
     ExecutionUnitTagName,
