@@ -24,17 +24,13 @@ from common_code.common.enums import (
 )
 from contextlib import asynccontextmanager
 
-# TODO: check this with other devs
-import sys
-
-sys.path.append("../tests/")
-
-import test_processing
-
 # Imports required by the service's model
 import json
 import cv2
 import numpy as np
+
+# service test imports
+import processing_test_functions
 
 settings = get_settings()
 
@@ -102,11 +98,32 @@ class MyService(Service):
 
     def main_test(self):
         results = [
-            test_processing.test_image_1(self),
-            test_processing.test_image_2(self),
+            processing_test_functions.test_image_1(self),
+            processing_test_functions.test_image_2(self),
         ]
         tests_passed = all([result["result"] for result in results])
         return TestResultList(results=results, tests_passed=tests_passed)
+
+    def download_test_data(self):
+        folder_path = os.path.join(".", "test_data")
+
+        zip_file_path = os.path.join(".", "test_data", "test_data.zip")
+
+        if not os.path.exists(folder_path):
+            raise HTTPException(status_code=404, detail="Data not found")
+
+        if not os.path.exists(zip_file_path):
+            with zipfile.ZipFile(zip_file_path, "w") as zip_file:
+                for file_name in os.listdir(folder_path):
+                    file_path = os.path.join(folder_path, file_name)
+                    if os.path.isfile(file_path) and file_name.lower().endswith(".jpg"):
+                        zip_file.write(file_path, file_name)
+
+        return FileResponse(
+            zip_file_path,
+            media_type="application/octet-stream",
+            filename="test_data.zip",
+        )
 
 
 service_service: ServiceService | None = None
@@ -206,54 +223,3 @@ app.add_middleware(
 @app.get("/", include_in_schema=False)
 async def root():
     return RedirectResponse("/docs", status_code=301)
-
-
-# TODO: check what group this endpoint should be in
-
-
-@app.get(
-    "/test",
-    summary="Tests the service",
-    responses={
-        200: {"detail": "Tests failed"},
-        204: {"detail": "Tests passed"},
-        500: {"detail": "Internal Server error"},
-    },
-    status_code=204,
-)
-async def test():
-    my_service = MyService()
-    loop = asyncio.get_event_loop()
-    test_result_future = loop.run_in_executor(None, my_service.main_test)
-    test_result_list = await test_result_future
-    if not test_result_list["tests_passed"]:
-        raise HTTPException(status_code=200, detail=test_result_list["results"])
-
-
-@app.get(
-    "/download_test_data/",
-    summary="Download test data",
-    responses={
-        200: {"detail": "Test data downloaded"},
-        500: {"detail": "Internal Server error"},
-        404: {"detail": "Data not found"},
-    },
-    status_code=200,
-)
-async def download_test_data():
-    folder_path = os.path.join(".", "test_data")
-    zip_file_path = os.path.join(".", "test_data", "test_data.zip")
-
-    if not os.path.exists(folder_path):
-        raise HTTPException(status_code=404, detail="Data not found")
-
-    if not os.path.exists(zip_file_path):
-        with zipfile.ZipFile(zip_file_path, "w") as zip_file:
-            for file_name in os.listdir(folder_path):
-                file_path = os.path.join(folder_path, file_name)
-                if os.path.isfile(file_path) and file_name.lower().endswith(".jpg"):
-                    zip_file.write(file_path, file_name)
-
-    return FileResponse(
-        zip_file_path, media_type="application/octet-stream", filename="test_data.zip"
-    )
