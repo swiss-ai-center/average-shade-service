@@ -1,8 +1,10 @@
 import asyncio
 import time
-from fastapi import FastAPI
+import os
+import zipfile
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from common_code.config import get_settings
 from common_code.http_client import HttpClient
 from common_code.logger.logger import get_logger, Logger
@@ -14,14 +16,21 @@ from common_code.tasks.service import TasksService
 from common_code.tasks.models import TaskData
 from common_code.service.models import Service
 from common_code.service.enums import ServiceStatus
-from common_code.common.enums import FieldDescriptionType, ExecutionUnitTagName, ExecutionUnitTagAcronym
-from common_code.common.models import FieldDescription, ExecutionUnitTag
+from common_code.common.models import FieldDescription, ExecutionUnitTag, TestResultList
+from common_code.common.enums import (
+    FieldDescriptionType,
+    ExecutionUnitTagName,
+    ExecutionUnitTagAcronym,
+)
 from contextlib import asynccontextmanager
 
 # Imports required by the service's model
 import json
 import cv2
 import numpy as np
+
+# service test imports
+import processing_test_functions
 
 settings = get_settings()
 
@@ -52,11 +61,11 @@ class MyService(Service):
             tags=[
                 ExecutionUnitTag(
                     name=ExecutionUnitTagName.IMAGE_PROCESSING,
-                    acronym=ExecutionUnitTagAcronym.IMAGE_PROCESSING
+                    acronym=ExecutionUnitTagAcronym.IMAGE_PROCESSING,
                 ),
             ],
             docs_url="https://docs.swiss-ai-center.ch/reference/services/average-shade/",
-            has_ai=False
+            has_ai=False,
         )
         self._logger = get_logger(settings)
 
@@ -68,14 +77,45 @@ class MyService(Service):
         average_color = np.average(average_color_row, axis=0)
         return {
             "result": TaskData(
-                data=json.dumps({
-                    "Red": int(average_color[2]),
-                    "Green": int(average_color[1]),
-                    "Blue": int(average_color[0])
-                }),
-                type=FieldDescriptionType.APPLICATION_JSON
+                data=json.dumps(
+                    {
+                        "Red": int(average_color[2]),
+                        "Green": int(average_color[1]),
+                        "Blue": int(average_color[0]),
+                    }
+                ),
+                type=FieldDescriptionType.APPLICATION_JSON,
             )
         }
+
+    def main_test(self):
+        results = [
+            processing_test_functions.test_image_1(self),
+            processing_test_functions.test_image_2(self),
+        ]
+        tests_passed = all([result["result"] for result in results])
+        return TestResultList(results=results, tests_passed=tests_passed)
+
+    def download_test_data(self):
+        folder_path = os.path.join(".", "test_data")
+
+        zip_file_path = os.path.join(".", "test_data", "test_data.zip")
+
+        if not os.path.exists(folder_path):
+            raise HTTPException(status_code=404, detail="Data not found")
+
+        if not os.path.exists(zip_file_path):
+            with zipfile.ZipFile(zip_file_path, "w") as zip_file:
+                for file_name in os.listdir(folder_path):
+                    file_path = os.path.join(folder_path, file_name)
+                    if os.path.isfile(file_path) and file_name.lower().endswith(".jpg"):
+                        zip_file.write(file_path, file_name)
+
+        return FileResponse(
+            zip_file_path,
+            media_type="application/octet-stream",
+            filename="test_data.zip",
+        )
 
 
 service_service: ServiceService | None = None
@@ -108,13 +148,17 @@ async def lifespan(app: FastAPI):
         for engine_url in settings.engine_urls:
             announced = False
             while not announced and retries > 0:
-                announced = await service_service.announce_service(my_service, engine_url)
+                announced = await service_service.announce_service(
+                    my_service, engine_url
+                )
                 retries -= 1
                 if not announced:
                     time.sleep(settings.engine_announce_retry_delay)
                     if retries == 0:
-                        logger.warning(f"Aborting service announcement after "
-                                       f"{settings.engine_announce_retries} retries")
+                        logger.warning(
+                            f"Aborting service announcement after "
+                            f"{settings.engine_announce_retries} retries"
+                        )
 
     # Announce the service to its engine
     asyncio.ensure_future(announce())
@@ -155,8 +199,8 @@ app = FastAPI(
 )
 
 # Include routers from other files
-app.include_router(service_router, tags=['Service'])
-app.include_router(tasks_router, tags=['Tasks'])
+app.include_router(service_router, tags=["Service"])
+app.include_router(tasks_router, tags=["Tasks"])
 
 app.add_middleware(
     CORSMiddleware,
