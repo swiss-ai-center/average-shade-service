@@ -53,18 +53,10 @@ class MyService(Service):
             description=api_description,
             status=ServiceStatus.AVAILABLE,
             data_in_fields=[
-                FieldDescription(
-                    name="image",
-                    type=[
-                        FieldDescriptionType.IMAGE_PNG,
-                        FieldDescriptionType.IMAGE_JPEG,
-                    ],
-                ),
+                FieldDescription(name="image", type=[FieldDescriptionType.IMAGE_PNG, FieldDescriptionType.IMAGE_JPEG]),
             ],
             data_out_fields=[
-                FieldDescription(
-                    name="result", type=[FieldDescriptionType.APPLICATION_JSON]
-                ),
+                FieldDescription(name="result", type=[FieldDescriptionType.APPLICATION_JSON]),
             ],
             tags=[
                 ExecutionUnitTag(
