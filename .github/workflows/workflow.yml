@@ -47,9 +47,9 @@ env:
   # Kube configuration
   PROD_KUBE_CONFIG: ${{ secrets.PROD_KUBE_CONFIG }}
   # Keda service
-  PROD_KEDA_SERVICE: ${{ vars.DEV_KEDA_SERVICE }}
+  PROD_KEDA_SERVICE: ${{ vars.PROD_KEDA_SERVICE }}
   # Keda port
-  PROD_KEDA_PORT: ${{ vars.DEV_KEDA_PORT }}
+  PROD_KEDA_PORT: ${{ vars.PROD_KEDA_PORT }}
 
 # Allow one concurrent deployment
 concurrency:
