@@ -160,6 +160,11 @@ jobs:
               -f stateful.yml \
               -f service.yml \
               -f ingress.yml
+            # add scaledobject.yml if DEV_KEDA_SERVICE is set
+            if [ -n "${{ env.DEV_KEDA_SERVICE }}" ]; then
+              echo "Applying scaled-object.yml"
+              kubectl --namespace ${{ env.DEV_NAMESPACE }} apply -f scaled-object.yml
+            fi
 
   deploy-prod:
     needs: release
@@ -203,3 +208,8 @@ jobs:
               -f stateful.yml \
               -f service.yml \
               -f ingress.yml
+            # add scaledobject.yml if PROD_KEDA_SERVICE is set
+            if [ -n "${{ env.PROD_KEDA_SERVICE }}" ]; then
+              echo "Applying scaled-object.yml"
+              kubectl --namespace ${{ env.PROD_NAMESPACE }} apply -f scaled-object.yml
+            fi
