@@ -72,7 +72,7 @@ class MyService(Service):
                     "Red": int(average_color[2]),
                     "Green": int(average_color[1]),
                     "Blue": int(average_color[0])
-                }),
+                }).encode("utf-8"),
                 type=FieldDescriptionType.APPLICATION_JSON
             )
         }
