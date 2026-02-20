@@ -14,4 +14,4 @@ spec:
   replicas:
     min: 0
     max: 2
-  scaledownPeriod: 86400 # 24 hours
+  scaledownPeriod: 300 # 24 hours
