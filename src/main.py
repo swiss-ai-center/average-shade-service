@@ -116,11 +116,27 @@ async def lifespan(app: FastAPI):
                         logger.warning(f"Aborting service announcement after "
                                        f"{settings.engine_announce_retries} retries")
 
+    async def run_heartbeat(my_service:Service,interval: int = 30):
+        # Get interval from settings or default to 30 seconds
+        interval = getattr(settings, 'heartbeat_interval', interval)
+
+        while True:
+            # Wait for the defined interval before sending the next ping
+            await asyncio.sleep(interval)
+
+            for engine_url in settings.engine_urls:
+                try:
+                    await service_service.heartbeat(engine_url,my_service)
+                except Exception as e:
+                    logger.warning(f"Failed to send heartbeat to {engine_url}: {e}")
+
     # Announce the service to its engine
     asyncio.ensure_future(announce())
 
+    # Start the heartbeat task in the background
+    heartbeat_task = asyncio.create_task(run_heartbeat(my_service,20))
     yield
-
+    heartbeat_task.cancel()
     # Shutdown
     for engine_url in settings.engine_urls:
         await service_service.graceful_shutdown(my_service, engine_url)
