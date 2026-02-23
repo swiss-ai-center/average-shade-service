@@ -116,7 +116,7 @@ async def lifespan(app: FastAPI):
                         logger.warning(f"Aborting service announcement after "
                                        f"{settings.engine_announce_retries} retries")
 
-    async def run_heartbeat(my_service:Service,interval: int = 30):
+    async def run_heartbeat(my_service: Service, interval: int = 30):
         # Get interval from settings or default to 30 seconds
         interval = getattr(settings, 'heartbeat_interval', interval)
 
@@ -126,7 +126,7 @@ async def lifespan(app: FastAPI):
 
             for engine_url in settings.engine_urls:
                 try:
-                    await service_service.heartbeat(engine_url,my_service)
+                    await service_service.heartbeat(engine_url, my_service)
                 except Exception as e:
                     logger.warning(f"Failed to send heartbeat to {engine_url}: {e}")
 
@@ -134,7 +134,7 @@ async def lifespan(app: FastAPI):
     asyncio.ensure_future(announce())
 
     # Start the heartbeat task in the background
-    heartbeat_task = asyncio.create_task(run_heartbeat(my_service,20))
+    heartbeat_task = asyncio.create_task(run_heartbeat(my_service, 20))
     yield
     heartbeat_task.cancel()
     # Shutdown
