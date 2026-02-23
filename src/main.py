@@ -134,7 +134,7 @@ async def lifespan(app: FastAPI):
     asyncio.ensure_future(announce())
 
     # Start the heartbeat task in the background
-    heartbeat_task = asyncio.create_task(run_heartbeat(my_service, 360))
+    heartbeat_task = asyncio.create_task(run_heartbeat(my_service, 20))
     yield
     heartbeat_task.cancel()
     # Shutdown
