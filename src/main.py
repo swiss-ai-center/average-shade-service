@@ -181,6 +181,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 @app.middleware("http")
 async def log_every_request(request: Request, call_next):
     path = request.url.path
@@ -191,6 +193,7 @@ async def log_every_request(request: Request, call_next):
 
     response = await call_next(request)
     return response
+
 
 # Redirect to docs
 @app.get("/", include_in_schema=False)
