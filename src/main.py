@@ -1,8 +1,8 @@
 import asyncio
 import time
-from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, Request
 from common_code.config import get_settings
 from common_code.http_client import HttpClient
 from common_code.logger.logger import get_logger, Logger
@@ -181,7 +181,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+@app.middleware("http")
+async def log_every_request(request: Request, call_next):
+    path = request.url.path
+    method = request.method
+    user_agent = request.headers.get("user-agent", "Unknown")
 
+    print(f"[DEBUG KEDA] Incoming traffic - Method: {method} | Path: {path} | Agent: {user_agent}", flush=True)
+
+    response = await call_next(request)
+    return response
 
 # Redirect to docs
 @app.get("/", include_in_schema=False)
