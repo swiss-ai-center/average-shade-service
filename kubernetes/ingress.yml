@@ -6,6 +6,16 @@ metadata:
     cert-manager.io/issuer: "letsencrypt"
     nginx.ingress.kubernetes.io/proxy-body-size: "16m"
     nginx.org/client-max-body-size: "16m"
+    # Intercept bot traffic at the NGINX level
+    # This prevents the requests from reaching KEDA and resetting the scale-down timer
+    nginx.ingress.kubernetes.io/server-snippet: |
+        location = /robots.txt {
+            add_header Content-Type text/plain;
+            return 200 "User-agent: *\nDisallow: /\n";
+        }
+        location = /favicon.ico {
+            return 204;
+        }
 spec:
   ingressClassName: nginx
   rules:
