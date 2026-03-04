@@ -142,6 +142,7 @@ jobs:
           engine-announce-retries: ${{ env.DEV_ENGINE_ANNOUNCE_RETRIES }}
           engine-announce-retry-delay: ${{ env.DEV_ENGINE_ANNOUNCE_RETRY_DELAY }}
           keda-service: ${{ env.DEV_KEDA_SERVICE }}
+          keda-scaledown-period: ${{ env.DEV_KEDA_SCALE_PERIOD_SECONDS }}
 
       - name: Remove unnecessary keys from configuration files
         uses: swiss-ai-center/common-code/.github/actions/remove-unnecessary-keys-from-kubernetes-configuration-files@main
