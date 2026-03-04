@@ -1,5 +1,5 @@
 apiVersion: http.keda.sh/v1alpha1
-kind: HTTPScaledObject
+kind: ScaledObject
 metadata:
   name: my-service-scaledobject
 spec:
