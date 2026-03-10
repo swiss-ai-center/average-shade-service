@@ -2,7 +2,8 @@
 FROM python:3.11
 
 # Install all required packages to run the model
-RUN apt update && apt install --yes ffmpeg libsm6 libxext6
+# TODO: 1. Add any additional packages required to run your model
+# RUN apt update && apt install --yes package1 package2 ...
 
 # Work directory
 WORKDIR /app
@@ -20,7 +21,7 @@ COPY src src
 # Environment variables
 ENV ENVIRONMENT=${ENVIRONMENT}
 ENV LOG_LEVEL=${LOG_LEVEL}
-ENV ENGINE_URLS=${ENGINE_URLS}
+ENV ENGINE_URL=${ENGINE_URL}
 ENV MAX_TASKS=${MAX_TASKS}
 ENV ENGINE_ANNOUNCE_RETRIES=${ENGINE_ANNOUNCE_RETRIES}
 ENV ENGINE_ANNOUNCE_RETRY_DELAY=${ENGINE_ANNOUNCE_RETRY_DELAY}
