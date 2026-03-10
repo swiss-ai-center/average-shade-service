@@ -1,6 +1,7 @@
-name: template-sync.yml
+name: Template Sync
+
 on:
-# Cronjob trigger (runs every Sunday at midnight)
+  # Cronjob trigger (runs every Sunday at midnight)
   schedule:
   - cron: "0 0 * * 0"
   # Manual trigger
@@ -15,14 +16,21 @@ jobs:
       pull-requests: write
 
     steps:
-      # Checkout the current repository
+      # Checkout the current repository using the PAT so it has workflow permissions
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.TEMPLATE_SYNC_PAT }}
+
       # Run the template sync action
       - name: actions-template-sync
         uses: AndreasAugustin/actions-template-sync@v2
+        env:
+          # Force the GitHub CLI inside the action to use your PAT for pushing to the target repo
+          GITHUB_TOKEN: ${{ secrets.TEMPLATE_SYNC_PAT }}
         with:
           source_repo_path: swiss-ai-center/create-a-new-service-generic-template
           upstream_branch: main
           pr_labels: template-sync, automated-pr
-          github_token: ${{ secrets.TEMPLATE_SYNC_PAT }}
+          # Use the PAT for reading the source repository
+          source_gh_token: ${{ secrets.TEMPLATE_SYNC_PAT }}
