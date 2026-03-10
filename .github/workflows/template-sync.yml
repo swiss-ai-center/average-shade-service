@@ -31,6 +31,6 @@ jobs:
         with:
           source_repo_path: swiss-ai-center/create-a-new-service-generic-template
           upstream_branch: main
-          pr_labels: template-sync, automated-pr
+          pr_labels: template-sync,automated-pr
           # Use the PAT for reading the source repository
           source_gh_token: ${{ secrets.TEMPLATE_SYNC_PAT }}
