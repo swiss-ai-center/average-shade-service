@@ -25,3 +25,4 @@ jobs:
           source_repo_path: swiss-ai-center/create-a-new-service-generic-template
           upstream_branch: main
           pr_labels: template-sync, automated-pr
+          github_token: ${{ secrets.TEMPLATE_SYNC_PAT }}
