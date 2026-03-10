@@ -1,5 +1,5 @@
 apiVersion: http.keda.sh/v1alpha1
-kind: ScaledObject
+kind: HTTPScaledObject
 metadata:
   name: my-service-scaledobject
 spec:
@@ -14,4 +14,4 @@ spec:
   replicas:
     min: 0
     max: 2
-  scaledownPeriod: 300 # 24 hours
+  scaledownPeriod: 86400 # 24 hours
