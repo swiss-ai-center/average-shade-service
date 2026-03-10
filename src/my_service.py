@@ -20,6 +20,7 @@ api_summary = """
 Returns the average shade of an image.
 """
 
+
 class MyService(Service):
     """
     Average shade service model
