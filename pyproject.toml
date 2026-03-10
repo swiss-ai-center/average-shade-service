@@ -1,5 +1,5 @@
 [project]
-name = "average-shade"
+name = "service" # Edit this and remove comment
 
 [tool.pytest.ini_options]
 pythonpath = [".", "src"]
