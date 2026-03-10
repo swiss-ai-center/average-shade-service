@@ -22,6 +22,7 @@ Returns the average shade of an image.
 api_title = "Average Shade API."
 version = "1.0.0"
 
+
 class MyService(Service):
     """
     Average shade service model
