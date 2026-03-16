@@ -4,7 +4,10 @@ version = "1.0.0"
 
 requires-python = ">=3.10"
 dependencies = [
-  "common-code[test] @ git+https://github.com/swiss-ai-center/common-code.git@main"
+    "common-code[test] @ git+https://github.com/swiss-ai-center/common-code.git@main",
+    "numpy~=1.26.4",
+    "opencv-python~=4.9.0.80"
+
 
 ]
 [tool.pytest.ini_options]

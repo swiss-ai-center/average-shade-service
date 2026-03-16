@@ -9,11 +9,10 @@ RUN apt update && apt install --yes ffmpeg libsm6 libxext6
 WORKDIR /app
 
 # Copy requirements file
-COPY ./uv.lock .
-
+COPY pyproject.toml uv.lock ./
 # Install dependencies
+RUN pip install --no-cache-dir uv
 RUN uv sync
-
 # Copy sources
 COPY src src
 
@@ -30,6 +29,6 @@ EXPOSE 80
 
 # Switch to src directory
 WORKDIR "/app/src"
-
+ENTRYPOINT ["uv", "run"]
 # Command to run on start
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
