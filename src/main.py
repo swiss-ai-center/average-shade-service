@@ -41,4 +41,5 @@ app.add_middleware(
 # Redirect to docs
 @app.get("/", include_in_schema=False)
 async def root():
+    print("Test template merge on dev branch")
     return RedirectResponse("/docs", status_code=301)
