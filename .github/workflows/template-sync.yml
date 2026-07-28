@@ -33,12 +33,6 @@ jobs:
         with:
           source_repo_path: swiss-ai-center/create-a-new-service-generic-template
           upstream_branch: main
+          target_branch: dev
           pr_labels: template-sync,automated-pr
           source_gh_token: ${{ secrets.TEMPLATE_SYNC_PAT }}
-
-      - name: Change PR base to dev
-        if: steps.sync.outputs.pr_number != ''
-        env:
-          GH_TOKEN: ${{ secrets.TEMPLATE_SYNC_PAT }}
-        run: |
-          gh pr edit ${{ steps.sync.outputs.pr_number }} --base dev
